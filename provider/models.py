@@ -1,8 +1,38 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models.functions import datetime
-from abstract.models import Statuses, Info, Discount
+from abstractions.abstact_models import Statuses, Info, Discount
 from django.contrib.auth.models import User
 from showroom.models import Showroom
+
+
+class Provider(Info, Statuses):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    percentage_of_price_increase = models.PositiveIntegerField(default=0, validators=[MinValueValidator(1),
+                                                                                      MaxValueValidator(100)],
+                                                               null=True, blank=True)
+
+    class Meta:
+        db_table = "provider"
+
+    def str(self):
+        return f"{self.name}"
+
+
+class DiscountProvider(Discount):
+    provider = models.ForeignKey(
+        Provider,
+        related_name="provider_discounts",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
+    class Meta:
+        db_table = "provider_discount"
+
+    def str(self):
+        return f"{self.start_date} {self.end_date} {self.discount_amount} {self.provider}"
+
 
 BODY_TYPES = [
     ('1', "Car's body type"),
@@ -42,7 +72,8 @@ class Car(Statuses):
     average_fuel_consumption = models.DecimalField(max_digits=2, decimal_places=1,
                                                    help_text="<b>Car's average fuel consumption per 100 km</b>")
     bio = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    price = models.DecimalField(max_digits=5, decimal_places=2, help_text="<b>The initial price of the car</b>",
+                                null=True, blank=True)
     showroom = models.ForeignKey(
         Showroom,
         null=True,
@@ -50,36 +81,16 @@ class Car(Statuses):
         on_delete=models.SET_NULL,
         related_name="showrooms_cars",
     )
+    provider = models.ForeignKey(
+        Provider,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="providers_cars",
+    )
 
     class Meta:
         db_table = "car"
 
     def str(self):
         return f"{self.name} {self.model}"
-
-
-class Provider(Info, Statuses):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    number_of_buyers = models.PositiveIntegerField(default=0)
-    price = models.DecimalField(max_digits=15, decimal_places=2)
-
-    class Meta:
-        db_table = "provider"
-
-    def str(self):
-        return f"{self.name} {self.bio}"
-
-
-class DiscountProvider(Discount):
-    provider = models.ForeignKey(
-        Provider,
-        related_name="provider_discounts",
-        on_delete=models.CASCADE,
-        null=True,
-    )
-
-    class Meta:
-        db_table = "provider_discount"
-
-    def str(self):
-        return f"{self.start_date} {self.end_date} {self.discount_amount} {self.provider}"

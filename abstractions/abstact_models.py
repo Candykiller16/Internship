@@ -23,6 +23,7 @@ class Discount(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(default=thirty_day_hence)
     discount_amount = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(100)])
+    amount = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         abstract = True

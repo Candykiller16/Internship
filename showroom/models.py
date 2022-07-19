@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from abstract.models import Statuses, Info, Discount
+from abstractions.abstact_models import Statuses, Info, Discount
 
 
 class Showroom(Statuses, Info):
@@ -13,7 +13,7 @@ class Showroom(Statuses, Info):
         db_table = "showroom"
 
     def str(self):
-        return f"{self.name} {self.bio}"
+        return f"{self.name}"
 
 
 class DiscountShowroom(Statuses, Discount):
