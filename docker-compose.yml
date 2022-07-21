@@ -9,6 +9,8 @@ services:
       - DATABASE_NAME="${DATABASE_NAME}"
       - DATABASE_USER="${DATABASE_USER}"
       - DATABASE_PASS="${DATABASE_PASS}"
+    ports:
+      - "5432:5432"
   web:
     build: .
     command: sh -c "
